@@ -1,0 +1,375 @@
+﻿#!/bin/sh
+
+OPTIND=1
+
+while getopts "i:n" opt; do
+    case $opt in
+		i)
+            if [ -z "$2" ]; then
+				printf "Wrong argument syntax.\n" >&2
+                exit 1
+			elif [ "$OPTARG" == "-i" ]; then
+				printf "Wrong argument syntax.\n" >&2
+                exit 69
+			elif [ "$OPTARG" == "-n" ]; then
+				printf "Wrong argument syntax.\n" >&2
+                exit 69
+            else
+                REGEX_ENABLED=1
+                REGEX=$OPTARG
+				REGEX=$( printf "%s" "$REGEX" | sed -e 's@\$@(/|$)@g' | sed -e 's@\^@/@g' | sed -e 's@(@\\(@g' | sed -e 's@|@\\|@g' | sed -e 's@)@\\)@g' )
+				REGEX=".*$REGEX.*"
+            fi
+            ;;
+        n)
+			if [ "$OPTARG" == "-n" ]; then
+				printf "Wrong argument syntax.\n" >&2
+                exit 69
+            else
+				NORMALIZE=1
+			fi
+            ;;       
+        *)
+            printf "WARNING: Unknown option: (Use n or i)\n" >&2
+			exit 2
+            ;;
+    esac
+done
+
+shift "$(($OPTIND - 1))"
+
+if [ -n "$2" ]; then
+	printf "WARNING: Unknown option: $2\n" >&2
+	exit 42
+fi
+
+if [ -d "$1" ]; then
+	ROOT=${1}
+elif [ -z "$1" ]; then
+	ROOT=$(pwd)	
+else
+	printf "WARNING: Unknown option: $1\n" >&2
+	exit 4
+fi
+
+if [ "$REGEX" == "$ROOT" ]; then
+	printf "WARNING: Invalid regex value!\n" >&2
+	exit 5
+fi
+
+if [ `find $ROOT -prune -empty` ]; then
+  printf "WARNING: Empty directory!\n" >&2
+  exit 6
+fi
+
+if [ -t 1 ]; then NC=$( tput cols ); else NC=80; fi
+
+if [ "$REGEX_ENABLED" == '1' ]; then
+	ND=$( find $ROOT -type d ! -regex "$REGEX" | wc -l )
+	NF=$( find $ROOT -type f ! -regex "$REGEX" | wc -l )
+else
+	ND=$( find $ROOT -type d | wc -l )
+	NF=$( find $ROOT -type f | wc -l )
+fi
+
+printf "Root directory: $ROOT\n"
+printf "Directories: $ND\n"
+printf "All files: $NF\n"
+
+printf "File size histogram:\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size -100c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", (($1 / $2) * ($3 - 12 - 1))) }' )
+	else
+		NO=$( find $ROOT -type f -size -100c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", (($1 / $2) * ($3 - 12 - 1))) }' )
+	fi
+	
+	printf "  <100 B  : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <100 B  : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size -100c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size -100c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +99c -size -1024c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +99c -size -1024c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <1 KiB  : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <1 KiB  : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +99c -size -1024c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +99c -size -1024c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +1023c -size -10240c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +1023c -size -10240c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <10 KiB : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <10 KiB : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +1023c -size -10240c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +1023c -size -10240c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +10239c -size -102400c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +10239c -size -102400c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <100 KiB: "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <100 KiB: "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +10239c -size -102400c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +10239c -size -102400c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +102399c -size -1048576c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +102399c -size -1048576c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <1 MiB  : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <1 MiB  : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +102399c -size -1048576c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +102399c -size -1048576c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +1048575c -size -10485760c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +1048575c -size -10485760c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <10 MiB : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <10 MiB : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +1048575c -size -10485760c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +1048575c -size -10485760c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +10485759c -size -104857600c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +10485759c -size -104857600c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <100 MiB: "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <100 MiB: "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +10485759c -size -104857600c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +10485759c -size -104857600c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +104857599c -size -1073741824c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +104857599c -size -1073741824c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  <1 GiB  : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  <1 GiB  : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +104857599c -size -1073741824c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +104857599c -size -1073741824c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+if [ "$NORMALIZE" == '1' ]; then
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		NO=$( find $ROOT -type f -size +1073741823c ! -regex "$REGEX" | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	else
+		NO=$( find $ROOT -type f -size +1073741823c | wc -l)
+		NW=$( printf "$NO $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 12 - 1)) }' )
+	fi
+	
+	printf "  >=1 GiB : "
+	for i in `seq 1 $NW`; do
+		printf "#"
+	done
+else
+	printf "  >=1 GiB : "
+	if [ "$REGEX_ENABLED" == '1' ]; then
+		for i in $( find $ROOT -type f -size +1073741823c ! -regex "$REGEX" ); do
+			printf "#"
+		done	
+	else
+		for i in $( find $ROOT -type f -size +1073741823c ); do
+			printf "#"
+		done
+	fi
+fi
+printf "\n"
+
+printf "File type histogram:\n"
+
+if [ "$REGEX_ENABLED" == '1' ]; then
+	hist_list=$( for i in $( find $ROOT -type f ! -regex "$REGEX" ); do
+		file_type=$( file -b $i )
+		line_size=$( printf "$file_type" | wc -c )
+		
+		if [ "$line_size" -gt 40 ]; then
+			printf "  %-40.40s...: \n" "$file_type"
+		else
+			printf "  %-43.40s: \n" "$file_type"
+		fi	
+			
+	done )
+else
+	hist_list=$( for i in $( find $ROOT -type f ); do
+		file_type=$( file -b $i )
+		line_size=$( printf "$file_type" | wc -c )
+		
+		if [ "$line_size" -gt 40 ]; then
+			printf "  %-40.40s...: \n" "$file_type"
+		else
+			printf "  %-43.40s: \n" "$file_type"
+		fi	
+			
+	done )
+fi
+
+file_type_list=$( printf "$hist_list" | sort | uniq -c | sort -u | sort -gr | head | cut -c9- )
+file_type_numlist=$( printf "$hist_list" | sort | uniq -c | sort -u | sort -gr | head )
+
+list_size=$( printf "$file_type_list" | wc -l | awk '{ printf("%d", ($1 + 1)) }' )
+
+for i in `seq 1 $list_size`; do
+	printf "$( printf "$file_type_list" | head -n $i | tail -n 1 )"
+	num_hash=$( printf "$file_type_numlist" | head -n $i | tail -n 1 | awk '{ printf("%d", $1) }' )
+	
+	if [ "$NORMALIZE" == '1' ]; then
+		num_hash_norm=$( printf "$num_hash $NF $NC" | awk '{ printf("%.0f", ($1 / $2) * ($3 - 47 - 1)) }' )	
+		for j in `seq 1 $num_hash_norm`; do
+			printf "#"
+		done
+		printf "\n"	
+	else
+		for j in `seq 1 $num_hash`; do
+			printf "#"
+		done
+		printf "\n"
+	fi	
+done
+
+exit 0	
