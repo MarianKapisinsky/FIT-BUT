@@ -1,0 +1,31 @@
+IPK Projekt 2
+
+	Marian Kapisinsky (xkapis00)
+
+Obsah archivu:
+
+	# Makefile
+	# ipk-scan.cpp/.hpp
+	# interface.cpp/.hpp
+	# net.cpp/.hpp
+	# manual.pdf
+
+ipk-scan:
+
+	sudo ./ipk-scan {-i <interface>} -pu <port-ranges> -pt <port-ranges> [<domain-name> | <IP-address>]
+
+Parametre:
+
+	-pt, pu port-ranges - skenované tcp/udp porty, povolený zápis napr. -pt 22 alebo -pu 1-65535 alebo -pt 22,23,24
+	domain-name | ip address - doménové meno alebo IP adresa skenovaného stroja
+	-i eth0, kde argument predstavuje identifikátor rozhraní. Tento parameter je volitelný, v prípade jeho neprítomnosti se zvolí prvý IEEE 802 interface, ktorý má pridelenou neloopbackovú IP adresu
+
+Obmedzenie:
+
+	Aplikacia nepodporuje IPv6
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+V pripade, ze je TCP port filtrovany alebo v pripade UDP otvoreny, moze trvat az minutu/30 sekund, kym sa vypisu informacie.
+Je to kvoli signalu SIGALRM, ktory az po 30 sekundach ak nepride odpoved vola pcap_breakloop().
+Zvoleny casovy interval je vysvetleny v dokumentacii.
