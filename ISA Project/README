@@ -10,5 +10,3 @@ GEOLOCATION - continent, country, region, city, zip, latitude, longtitude
 -q <IP|hostname>, povinný argument
 -w <IP|hostname>, WHOIS serveru, ktorý bude dotazovaný, povinný argument
 -d <IPv4>, ktorý bude dotazovaný, nepovinný argument pričom implicitne se používa DNS resolver v operačnom systéme
-
-18,75/20
