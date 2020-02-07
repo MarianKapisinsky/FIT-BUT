@@ -8,10 +8,7 @@ GEOLOCATION - continent, country, region, city, zip, latitude, longtitude
 ./isa-tazatel -q www.fit.vutbr.cz -w whois.ripe.net -d 8.8.8.8
 
 -q <IP|hostname>, povinný argument
--w <IPv4|hostname WHOIS serveru>, ktorý bude dotazovaný, povinný argument
+-w <IP|hostname>, WHOIS serveru, ktorý bude dotazovaný, povinný argument
 -d <IPv4>, ktorý bude dotazovaný, nepovinný argument pričom implicitne se používa DNS resolver v operačnom systéme
-
-Obmedzenia:
-IPv6 WHOIS serveru
 
 18,75/20
