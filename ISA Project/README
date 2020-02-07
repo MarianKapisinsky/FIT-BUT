@@ -1,0 +1,15 @@
+Program isa-tazatal poskytuje užívateľovi informácie o vlastníkoch domén s rozšírením o geolokačné informácie.
+
+DNS - A, AAAA, MX, CNAME, NS, SOA, PTR
+WHOIS - inetnum (inet6num), netname, descr, country, address, phone, admin-c
+	  - domain, registrant, admin-c, nsset, keyset, registrar, registered, name, address
+GEOLOCATION - continent, country, region, city, zip, latitude, longtitude
+
+./isa-tazatel -q www.fit.vutbr.cz -w whois.ripe.net -d 8.8.8.8
+
+-q <IP|hostname>, povinný argument
+-w <IPv4|hostname WHOIS serveru>, ktorý bude dotazovaný, povinný argument
+-d <IPv4>, ktorý bude dotazovaný, nepovinný argument pričom implicitne se používa DNS resolver v operačnom systéme
+
+Obmedzenia:
+IPv6 WHOIS serveru
