@@ -1,4 +1,4 @@
-# FIT-BUT
+# FIT-BUT-BC
 Some of school projects from my bachelors study at FIT BUT
 
 IDS project - SQL Script, documentation (30/30)
