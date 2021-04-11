@@ -1,5 +1,5 @@
 # FIT VUT Bachelor's Degree Assignments
-Some of the school projects from my bachelor's study at FIT VUT
+Some of the school assignments from my bachelor's degree study at FIT VUT
 
 IDS project - SQL Script, documentation (30/30)
 
