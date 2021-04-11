@@ -1,5 +1,5 @@
-# FIT-BUT-BC
-Some of school projects from my bachelors study at FIT BUT
+# FIT VUT Bachelor's Degree Assignments
+Some of the school projects from my bachelor's study at FIT VUT
 
 IDS project - SQL Script, documentation (30/30)
 
